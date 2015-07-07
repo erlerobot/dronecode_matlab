@@ -1,0 +1,93 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+%% File : Arduino_Mag_sfcn.tlc
+%%
+
+%implements Arduino_Mag_sfcn "C"
+
+
+%% Function: BlockTypeSetup ===============================================
+%function BlockTypeSetup(block, system) void
+
+  %% Ensure required header files are included. This is common to all APM2
+  %% blocks.
+  %if EXISTS("_DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_") == 0
+    %assign:: _DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_ = 1
+    %if (CompiledModel.TargetStyle!="SimulationTarget")
+      %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+    %endif
+  %endif 
+
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+
+  %% Start up APM2 board. Common to all APM2 blocks. Must be called first!
+  %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+     %assign :: _DONE_SYSTEM_INIT_ = 1
+     /* APM2 System startup function. Required for any blocks. Inserted by:
+     %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+     Simulink_APM2_Startup();
+  %endif
+
+  %% Only insert the init once
+  %if EXISTS("_DONE_MAG_INIT_") == 0
+    %assign :: _DONE_MAG_INIT_ = 1
+    /* %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+   
+    %assign cal_offset_x_nT_val = LibBlockParameterValue(cal_offset_x_nT,0)
+    %assign cal_offset_y_nT_val = LibBlockParameterValue(cal_offset_y_nT,0)
+    %assign cal_offset_z_nT_val = LibBlockParameterValue(cal_offset_z_nT,0)
+
+     /* Pass calibration offsets to magnetometer. Have to convert from nT to gauss then LSB */
+    int16_t offset16x;
+    int16_t offset16y;
+    int16_t offset16z;
+
+    /* Start up compass */
+    compass_init(); 
+
+    offset16x = (int16_t)(((float)%<cal_offset_x_nT_val>/100000.0)*1090);
+    offset16y = (int16_t)(((float)%<cal_offset_y_nT_val>/100000.0)*1090);
+    offset16z = (int16_t)(((float)%<cal_offset_z_nT_val>/100000.0)*1090);
+    compass_set_offsets(offset16x, offset16y, offset16z);
+
+  %endif
+
+  %%
+%endfunction
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+  %if (CompiledModel.TargetStyle!="SimulationTarget")  
+%% Get mask paramters
+    %assign cal_gain_x_val = LibBlockParameterValue(cal_gain_x,0)
+    %assign cal_gain_y_val = LibBlockParameterValue(cal_gain_y,0)
+    %assign cal_gain_z_val = LibBlockParameterValue(cal_gain_z,0)
+
+
+    compass_read();
+  
+    %% 91.74 = 100000/1090 or nT per LSB
+  %<LibBlockOutputSignal(0, "", "", 0)> = ((int32_t)(compass_get_mag_x()))*(int32_t)(91.74*%<cal_gain_x_val>);
+  %<LibBlockOutputSignal(1, "", "", 0)> = ((int32_t)(compass_get_mag_y()))*(int32_t)(91.74*%<cal_gain_y_val>);
+  %<LibBlockOutputSignal(2, "", "", 0)> = ((int32_t)(compass_get_mag_z()))*(int32_t)(91.74*%<cal_gain_z_val>);
+
+  %endif
+
+%endfunction
+
+%% [EOF]

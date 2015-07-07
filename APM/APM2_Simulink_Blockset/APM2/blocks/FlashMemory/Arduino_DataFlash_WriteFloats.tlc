@@ -1,0 +1,89 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+%% File : Arduino_DataFlash_WriteFloats.tlc
+%%
+%% Description: 
+%%   Code generation file for Arduino_DataFlash_WriteFloats
+
+%% Copyright 2010-2011 The MathWorks, Inc.
+
+%implements Arduino_DataFlash_WriteFloats "C"
+
+%include "block_common_includes.tlc"
+
+%% Function: BlockTypeSetup ===============================================
+%function BlockTypeSetup(block, system) void
+  
+  %% Ensure required header files are included. This is common to all APM2
+  %% blocks.
+  %if EXISTS("_DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_") == 0
+    %assign:: _DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_ = 1
+    %if (CompiledModel.TargetStyle!="SimulationTarget")
+      %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+    %endif
+  %endif 
+
+
+
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+  
+    %% Start up APM2 board. Common to all APM2 blocks.
+    %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+        %assign :: _DONE_SYSTEM_INIT_ = 1
+        /* APM2 System startup function. Required for any blocks. Inserted by:
+        %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+        Simulink_APM2_Startup();
+    %endif
+
+    
+    %% Get length of column name string
+    %%%assign strlen = LibBlockParameterSize(colnames,0)
+
+    %% Get SampleTime and precision
+    %% %assign colnames_val = LibBlockParameterValue(colnames,0)
+    %assign SampleTime_val = LibBlockParameterValue(SampleTime,1)
+    %assign precision_val = LibBlockParameterValue(precision,2)
+    %assign u1_dim1_val = LibBlockInputSignalWidth(0)
+    %assign colnames_ptr = LibBlockParameterAddr(colnames,"","",0)
+    
+    /* %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+    
+    %%DataFlash_WriteBlockData((const char*)%<colnames_ptr>, %<u1_dim1_val>, %<precision_val>);
+    
+    %%/* Register block with datalogger. NOTE: This will only work if the chip is writable because it was cleared via the
+    %%   menu or was otherwise already empty. If data is found and no action was taken via the serial menu, no new data
+    %%   will be recorded! Also assigning 0 to TYPE_UINT8 because the preprocessor is failing me again.
+    %%*/
+    datalog_register_block((const char*)%<colnames_ptr>, %<u1_dim1_val>, %<precision_val>);
+    
+%endfunction
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+  %if !SLibCodeGenForSim()
+    %%%assign colnum_val = LibBlockParameterValue(colnum,0)
+    %%%assign u1_val = LibBlockInputSignal(0, "", "", 0)
+    %assign u1_ptr = LibBlockInputSignalAddr(0, "", "", 0)
+    %assign u1_dim1_val = LibBlockInputSignalWidth(0)
+    datalog_write_float_array((float*)%<u1_ptr>, %<u1_dim1_val>);
+  
+  %endif
+
+%endfunction
+
+%% [EOF]

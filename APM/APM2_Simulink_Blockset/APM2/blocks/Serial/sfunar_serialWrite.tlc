@@ -1,0 +1,91 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+
+%% File : sfunar_serialWrite.tlc
+%%
+%% Description: 
+%%   Code generation file for sfunar_serialWrite
+
+%% Copyright 2010-2011 The MathWorks, Inc.
+
+%implements sfunar_serialWrite "C"
+
+%include "block_common_includes.tlc"
+
+%% Function: BlockTypeSetup ===============================================
+%function BlockTypeSetup(block, system) void
+  
+  %% Ensure required header files are included. This is common to all APM2
+  %% blocks.
+  %if EXISTS("_DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_") == 0
+    %assign:: _DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_ = 1
+    %if (CompiledModel.TargetStyle!="SimulationTarget")
+      %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+    %endif
+  %endif 
+
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+  
+    %% Get mask paramters
+    %assign baud_val = LibBlockParameterValue(baud,0)
+    %assign uart_val = LibBlockParameterValue(uart,0)
+    %assign ts_val = LibBlockParameterValue(SampleTime,0)
+
+    %% Start up APM2 board. Common to all APM2 blocks.
+    %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+        %assign :: _DONE_SYSTEM_INIT_ = 1
+        /* APM2 System startup function. Required for any blocks. Inserted by:
+        %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+        Simulink_APM2_Startup();
+    %endif
+
+    %% Start up the serial bus requested
+    %if %<uart_val> == 1
+        %if EXISTS("_DONE_UART0_INIT_") == 0
+            %assign :: _DONE_UART0_INIT_ = 1
+            /* Using UART0 */
+            Serial_begin(%<baud_val>);
+        %endif
+    %else
+         %if EXISTS("_DONE_UART2_INIT_") == 0
+            %assign :: _DONE_UART2_INIT_ = 1
+            /* Using UART2 */
+            Serial2_begin(%<baud_val>);
+        %endif
+    %endif
+
+%endfunction
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+  %if !SLibCodeGenForSim()
+    %assign uart_val = LibBlockParameterValue(uart,0)
+    %assign u1_ptr = LibBlockInputSignalAddr(0, "", "", 0)
+    %assign u1_dim1_val = LibBlockInputSignalWidth(0)
+
+    %if %<uart_val> == 1
+            Serial_write( %<u1_ptr>, (int16_T)%<u1_dim1_val>);
+     %else
+            Serial2_write( %<u1_ptr>, (int16_T)%<u1_dim1_val>);
+    %endif
+  
+  %endif
+
+%endfunction
+
+%% [EOF]

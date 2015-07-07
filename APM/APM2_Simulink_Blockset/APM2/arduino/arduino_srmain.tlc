@@ -1,0 +1,66 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Abstract:
+%%   Custom file processing to generate a "main" file.
+%%
+%% Copyright 1994-2011 The MathWorks, Inc.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%selectfile NULL_FILE
+
+%function FcnSingleTaskingMain() void
+  
+  %if GenerateSampleERTMain
+    %assign CompiledModel.GenerateSampleERTMain = TLC_FALSE
+  %endif
+
+  %assign cFile = LibCreateSourceFile("Source", "Custom", "ert_main")
+  
+  %openfile tmpBuf
+  #include "%<LibGetMdlPubHdrBaseName()>.h"
+  %%#include "C:\MATLAB\Targets\R2012a\arduino-1.0\hardware\arduino\variants\standard\pins_arduino.h"
+  %%#include "C:\MATLAB\Targets\R2012a\arduino-1.0\hardware\arduino\variants\mega\pins_arduino.h"
+  #include "Arduino.h"
+  %%#include "WProgram.h"
+  %closefile tmpBuf
+  
+  %<LibSetSourceFileSection(cFile, "Includes", tmpBuf)>
+
+  %openfile tmpBuf  
+
+  %closefile tmpBuf
+
+  %<LibSetSourceFileSection(cFile, "Declarations", tmpBuf)>
+  
+  %openfile tmpBuf
+  /* void __cxa_pure_virtual(void){} */
+  /* extern void __cxa_pure_virtual(void); */
+  
+  #define STEP_SIZE_MILLIS (%<CompiledModel.FundamentalStepSize>*1000)
+	
+  int_T main(void)
+  {
+    unsigned long previous = 0;
+    
+    /* Initialize model */
+    init();
+
+    %<LibCallModelInitialize()>\
+    
+     
+    /* Associate rt_OneStep() with a timer that executes at the base rate of the model */
+    while (true) {
+        if(millis()-previous >= STEP_SIZE_MILLIS) {
+            previous = millis();
+		%<LibCallModelStep(0)>\
+        }
+    }
+
+    %<LibCallModelTerminate()>\
+    return 0;
+  }
+  %closefile tmpBuf
+  
+  %<LibSetSourceFileSection(cFile, "Functions", tmpBuf)>
+  
+%endfunction

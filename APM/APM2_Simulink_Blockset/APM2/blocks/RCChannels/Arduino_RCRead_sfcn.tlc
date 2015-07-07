@@ -1,0 +1,81 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+
+%% File : Arduino_RCRead_sfcn.tlc
+%%
+
+%implements Arduino_RCRead_sfcn "C"
+
+
+%% Function: BlockTypeSetup ===============================================
+%function BlockTypeSetup(block, system) void
+
+  %% Ensure required header files are included. This is common to all APM2
+  %% blocks.
+  %if EXISTS("_DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_") == 0
+    %assign:: _DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_ = 1
+    %if (CompiledModel.TargetStyle!="SimulationTarget")
+      %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+    %endif
+  %endif 
+
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+
+  %% Start up APM2 board. Common to all APM2 blocks.
+  %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+     %assign :: _DONE_SYSTEM_INIT_ = 1
+     /* APM2 System startup function. Required for any blocks. Inserted by:
+     %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+     Simulink_APM2_Startup();
+  %endif
+
+  %% Only insert the init once
+  %if EXISTS("_DONE_RCRead_INIT_") == 0
+    %assign :: _DONE_RCRead_INIT_ = 1
+    /* %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+    
+    /* All init handled in System setup function */
+
+  %endif
+
+  %%
+%endfunction
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+  %if (CompiledModel.TargetStyle!="SimulationTarget")  
+
+
+    if (APM_RC_GetState())
+    {
+        %<LibBlockOutputSignal(0, "", "", 0)> = APM_RC_InputCh((uint16_T)0);
+        %<LibBlockOutputSignal(1, "", "", 0)> = APM_RC_InputCh((uint16_T)1);
+        %<LibBlockOutputSignal(2, "", "", 0)> = APM_RC_InputCh((uint16_T)2);
+        %<LibBlockOutputSignal(3, "", "", 0)> = APM_RC_InputCh((uint16_T)3);
+        %<LibBlockOutputSignal(4, "", "", 0)> = APM_RC_InputCh((uint16_T)4);
+        %<LibBlockOutputSignal(5, "", "", 0)> = APM_RC_InputCh((uint16_T)5);
+        %<LibBlockOutputSignal(6, "", "", 0)> = APM_RC_InputCh((uint16_T)6);
+        %<LibBlockOutputSignal(7, "", "", 0)> = APM_RC_InputCh((uint16_T)7);
+    }
+
+
+  %endif
+
+%endfunction
+
+%% [EOF]

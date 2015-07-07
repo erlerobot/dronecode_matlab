@@ -1,0 +1,43 @@
+%% SYSTLC: Arduino Target TMF: arduino.tmf MAKE: make_rtw \
+%% EXTMODE: no_ext_comm
+
+%% /* Copyright 2010 The MathWorks, Inc. */
+
+%selectfile NULL_FILE
+
+%assign CodeFormat = "Embedded-C"
+
+%assign TargetType = "RT"
+%assign Language   = "C"
+%assign AutoBuildProcedure = !GenerateSampleERTMain
+
+%% The model_SetEventsForThisBaseRate function is not required for the
+%% VxWorks environment, i.e., when using an operating system.
+%assign SuppressSetEventsForThisBaseRateFcn = (TargetOS == "VxWorksExample") 
+%assign InlineSetEventsForThisBaseRateFcn  = TLC_TRUE
+%assign SuppressMultiTaskScheduler = TLC_TRUE
+
+%include "codegenentry.tlc"
+
+%% The contents between 'BEGIN_RTW_OPTIONS' and 'END_RTW_OPTIONS' in this file
+%% are used to maintain backward compatibility to R13 and preR13 custom target 
+%% file only.  If you want to use this file as a template to develop your
+%% own system target file, you need to remove the 'CONFIGSET_TARGET_COMPONENT'
+%% section at the end of this file.
+%%
+/%
+  BEGIN_RTW_OPTIONS
+
+
+  %------------------------------------%
+  % Configure code generation settings %
+  %------------------------------------%
+  
+  rtwgensettings.BuildDirSuffix = '_arduino';
+  rtwgensettings.Version = '1';
+  rtwgensettings.DerivedFrom = 'ert.tlc';
+  rtwgensettings.SelectCallback = 'arduino_select_callback_handler(hDlg, hSrc)';
+
+  END_RTW_OPTIONS 
+ %/
+

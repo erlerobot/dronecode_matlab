@@ -1,0 +1,84 @@
+%% File : sfunar_analogInput.tlc
+%%
+%% Description: 
+%%   Code generation for sfunar_analogInput
+
+
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+%% Copyright 2010 The MathWorks, Inc.
+
+%implements sfunar_analogInput "C"
+
+%include "block_common_includes.tlc"
+
+%% Function: BlockTypeSetup ===============================================
+%function BlockTypeSetup(block, system) void
+    %% Ensure required header files are included
+    %<ArduinoCommonBlockTypeSetup(block, system)>
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+    %if !SLibCodeGenForSim()
+        %% Start up APM2 board. Common to all APM2 blocks.
+        %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+            %assign :: _DONE_SYSTEM_INIT_ = 1
+            /* APM2 System startup function. Required for any blocks. Inserted by:
+            %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+            Simulink_APM2_Startup();
+        %endif
+    %endif
+%endfunction
+
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+ %if !SLibCodeGenForSim()
+    %if !LibBlockOutputSignalIsExpr(0)
+    %assign p1_val = LibBlockParameter(p1, "", "", 0)
+    %assign y1_val = LibBlockOutputSignal(0, "", "", 0)
+    %%
+
+    %<y1_val> = analogRead( %<p1_val>);
+
+    %endif 
+ %endif
+  %%
+%endfunction
+
+%% Function: BlockOutputSignal ============================================
+%%
+%function BlockOutputSignal(block,system,portIdx,ucv,lcv,idx,retType) void
+  %%
+  %assign p1_val = LibBlockParameter(p1, "", "", 0)
+  %assign y1_val = LibBlockOutputSignal(0, "", "", 0)
+  %%
+  %switch retType
+    %case "Signal"
+      %if portIdx == 0
+        %return "analogRead( %<p1_val>)"
+      %else
+        %assign errTxt = "Block output port index not supported: %<portIdx>"
+        %<LibBlockReportError(block,errTxt)>
+      %endif
+    %default
+      %assign errTxt = "Unsupported return type: %<retType>"
+      %<LibBlockReportError(block,errTxt)>
+  %endswitch
+  %%
+%endfunction
+
+%% [EOF]

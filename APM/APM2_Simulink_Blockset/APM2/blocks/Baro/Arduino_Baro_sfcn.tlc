@@ -1,0 +1,70 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+%% File : Arduino_Baro_sfcn.tlc
+%%
+
+%implements Arduino_Baro_sfcn "C"
+
+
+%% Function: BlockTypeSetup ===============================================
+%function BlockTypeSetup(block, system) void
+
+  %% Ensure required header files are included. This is common to all APM2
+  %% blocks.
+  %if EXISTS("_DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_") == 0
+    %assign:: _DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_ = 1
+    %if (CompiledModel.TargetStyle!="SimulationTarget")
+      %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+    %endif
+  %endif 
+
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+
+  %% Start up APM2 board. Common to all APM2 blocks.
+  %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+     %assign :: _DONE_SYSTEM_INIT_ = 1
+     /* APM2 System startup function. Required for any blocks. Inserted by:
+     %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+     Simulink_APM2_Startup();
+  %endif
+
+  %% Only insert the init once
+  %if EXISTS("_DONE_BARO_INIT_") == 0
+    %assign :: _DONE_BARO_INIT_ = 1
+    /* %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+    /* Nothing extra to do */
+    %%pinMode(63, OUTPUT);
+    %%digitalWrite(63, HIGH);
+  %endif
+
+  %%
+%endfunction
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+  %if (CompiledModel.TargetStyle!="SimulationTarget")  
+    baro_read();
+
+    %<LibBlockOutputSignal(0, "", "", 0)> = 0.000295333727*((float)baro_get_pressure());
+    %<LibBlockOutputSignal(1, "", "", 0)> = ((float)baro_get_temperature())/10.0;
+
+  %endif
+
+%endfunction
+
+%% [EOF]

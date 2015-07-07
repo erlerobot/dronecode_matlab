@@ -1,0 +1,66 @@
+<productinfo
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://www.mathworks.com/namespace/info/v1/info.xsd">
+<?xml-stylesheet type="text/xsl" href="http://www.mathworks.com/namespace/info/v1/info.xsl"?>
+    
+<!--Copyright 2010 The MathWorks, Inc. -->
+
+<matlabrelease>14</matlabrelease>
+<name>Arduino Target</name>
+<type>links_targets</type>
+<icon>$toolbox/matlab/icons/boardicon.gif</icon>
+
+<list>
+
+<listitem>
+<label>Block Library</label>
+<callback>arduino_lib</callback>
+<icon>$toolbox/simulink/simulink/simulinkicon.gif</icon>
+</listitem>
+
+<listitem>
+<label>Help</label>
+<callback>doc arduino/contents</callback>
+<icon>$toolbox/matlab/icons/book_link.png</icon>
+</listitem>
+
+<listitem>
+<label>Blink</label>
+<callback>open_system('demo_arduino_blink')</callback>
+<icon>$toolbox/matlab/icons/demoicon.gif</icon>
+</listitem>
+
+<listitem>
+<label>Blink Challenge</label>
+<callback>open_system('demo_arduino_blink_challenge')</callback>
+<icon>$toolbox/matlab/icons/demoicon.gif</icon>
+</listitem>
+
+<listitem>
+<label>Blink Challenge (Stateflow)</label>
+<callback>open_system('demo_arduino_blink_challenge_stateflow')</callback>
+<icon>$toolbox/matlab/icons/demoicon.gif</icon>
+</listitem>
+
+<listitem>
+<label>Serial Communication</label>
+<callback>open_system('demo_arduino_serial_communication')</callback>
+<icon>$toolbox/matlab/icons/demoicon.gif</icon>
+</listitem>
+
+<listitem>
+<label>Processor-in-the-Loop</label>
+<callback>open_system('demo_arduino_pil')</callback>
+<icon>$toolbox/matlab/icons/demoicon.gif</icon>
+</listitem>
+
+<listitem>
+<label>Product Page (Web)</label>
+<callback>web http://www.mathworks.com/academia/arduino-software/ -browser;</callback>
+<icon>$toolbox/matlab/icons/webicon.gif</icon>
+</listitem>
+
+
+</list>
+
+</productinfo>

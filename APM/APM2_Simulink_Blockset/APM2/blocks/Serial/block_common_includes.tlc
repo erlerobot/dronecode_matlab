@@ -1,0 +1,36 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+
+%% File: block_common_includes.tlc
+%%
+%% Copyright 2002-2010 The MathWorks, Inc.
+
+%% Determine the build type
+%function SLibCodeGenForSim() void
+  %if (CompiledModel.TargetStyle=="SimulationTarget")
+    %return 1
+  %else
+    %return 0
+  %endif
+%endfunction
+
+%% Include common headers
+%function ArduinoCommonBlockTypeSetup(block, system) void
+    %if EXISTS("_DONE_COMMON_BLOCK_TYPE_SETUP_") == 0
+        %assign :: _DONE_COMMON_BLOCK_TYPE_SETUP_ = 1
+    
+        %if !SLibCodeGenForSim()
+            %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+        %endif
+    %endif
+%endfunction
+

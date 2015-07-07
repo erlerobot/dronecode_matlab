@@ -1,0 +1,110 @@
+%% This code was developed as part of graduate coursework at Embry-Riddle Aeronautical University
+%% under the guidance of Dr. Pat Anderson and Dr. Hever Moncayo.
+
+%% Author: Robert F. Hartley
+%% Assistant Developers: Francois Hugon, Brian DeRosa, and Christopher Carvalho
+%% Support: apm2.simulink@gmail.com
+
+%% Oct. 25, 2012
+%% Version 1.0
+
+
+%% File : sfunar_digitalInput.tlc
+%%
+
+%% Copyright 2010 The MathWorks, Inc.
+
+%implements sfunar_digitalInput "C"
+
+%include "block_common_includes.tlc"
+
+
+%% Function: BlockTypeSetup ===============================================
+%%
+%function BlockTypeSetup(block, system) void
+
+    %% Ensure required header files are included. This is common to all APM2
+    %% blocks.
+    %if EXISTS("_DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_") == 0
+        %assign:: _DONE_SYSTEM_INC_BLOCK_TYPE_SETUP_ = 1
+        %if (CompiledModel.TargetStyle!="SimulationTarget")
+            %<LibAddToCommonIncludes("Simulink_APM2_Wrapper.h")>
+        %endif
+    %endif 
+
+%endfunction
+
+%% Function: BlockInstanceSetup ===========================================
+%%
+%function BlockInstanceSetup(block, system) void
+  %%
+  %<LibBlockSetIsExpressionCompliant(block)>
+  %%
+%endfunction
+
+%% Function: Start ========================================================
+%%
+%function Start(block, system) Output
+  
+    %if !SLibCodeGenForSim()
+        %assign p1_val = LibBlockParameter(p1, "", "", 0)
+  
+        %% Start up APM2 board. Common to all APM2 blocks.
+        %if EXISTS("_DONE_SYSTEM_INIT_") == 0
+            %assign :: _DONE_SYSTEM_INIT_ = 1
+            /* APM2 System startup function. Required for any blocks. Inserted by:
+            %<Type> (%<ParamSettings.FunctionName>): %<Name> */
+            Simulink_APM2_Startup();
+        %endif
+
+        /* Set pin to input */
+        pinMode(%<p1_val>, INPUT);
+    %endif
+
+%endfunction
+
+%% Function: Outputs ======================================================
+%%
+%function Outputs(block, system) Output
+
+  %if !SLibCodeGenForSim()
+    %if !LibBlockOutputSignalIsExpr(0)
+      %assign p1_val = LibBlockParameter(p1, "", "", 0)
+      %assign y1_val = LibBlockOutputSignal(0, "", "", 0)
+      %%
+      
+      %<y1_val> = digitalRead(%<p1_val>);
+      
+    %endif 
+  %endif
+
+%endfunction
+
+
+%% Function: BlockOutputSignal =================================================
+%% Abstract:
+%%      Return an output expression.  This function *may*
+%%      be used by Simulink when optimizing the Block IO data structure.
+%%
+%function BlockOutputSignal(block,system,portIdx,ucv,lcv,idx,retType) void
+  
+  %assign retVal = 0U
+  
+  %if !SLibCodeGenForSim()
+    
+    %switch retType
+      %case "Signal"
+        %assign p1_val = LibBlockParameter(p1, "", "", 0)
+        %assign retVal = "digitalRead(%<p1_val>)"
+        %break
+      %default
+        %assign errTxt = "Unsupported return type: %<retType>"
+        %<LibBlockReportError(block,errTxt)>
+        %break
+    %endswitch
+    
+  %endif
+  
+  %return retVal
+  
+%endfunction
